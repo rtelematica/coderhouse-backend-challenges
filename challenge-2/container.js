@@ -5,7 +5,7 @@ import fs from 'fs';
 
 const productsFileName = 'productos.txt'
 
-let products = []
+let globalProducts = []
 
 class Product {
     constructor(title, price, thumbnail) {
@@ -19,17 +19,17 @@ class Container {
 
     @persist()
     async save(product) {
-        if(products.length === 0) {
+        if(globalProducts.length === 0) {
             product.id = 1;
         } else {
-            product.id = products[products.length - 1].id + 1;
+            product.id = globalProducts[globalProducts.length - 1].id + 1;
         }
-        products.push(product);
+        globalProducts.push(product);
     }
 
     @onlyread()
     async getById(id) {
-        const product = products.filter(p => p.id === id)
+        const product = globalProducts.filter(p => p.id === id)
         if (product.length === 0) {
             throw new Exception('Product not exist');
         }
@@ -39,21 +39,23 @@ class Container {
 
     @onlyread()
     async getAll() {
-        return products;
+        return globalProducts;
     }
 
     @persist()
     async deleteById(id) {
-        const productsWithoutSearchElement = products.filter(p => p.id !== id);
-        products = productsWithoutSearchElement;
+        const productsWithoutSearchElement = globalProducts.filter(p => p.id !== id);
+        globalProducts = productsWithoutSearchElement;
     }
 
     @persist()
     async deleteAll() {
-        products = [];
+        globalProducts = [];
     }
 }
 
+// Decorator to read the products.txt file and persist the elements 
+// of the products array in products.txt
 function persist() {
     return (target, key, descriptor) => {
         let fn = descriptor.value;
@@ -69,6 +71,7 @@ function persist() {
     }
 }
 
+// Decorator to read the products.txt
 function onlyread() {
     return (target, key, descriptor) => {
         let fn = descriptor.value;
@@ -84,7 +87,7 @@ function onlyread() {
 async function readProductsFile() {
     try {
         const productsJSONString = await fs.promises.readFile(`./${productsFileName}`, 'utf-8');
-        products = JSON.parse(productsJSONString);
+        globalProducts = JSON.parse(productsJSONString);
     } catch (error) {
         if (error.code === 'ENOENT' && error.syscall === 'open') {
             await fs.promises.writeFile(`./${productsFileName}`, '[]');
@@ -96,7 +99,7 @@ async function readProductsFile() {
 
 async function writeProductsFile() {
     try {
-        await fs.promises.writeFile(`./${productsFileName}`, JSON.stringify(products));
+        await fs.promises.writeFile(`./${productsFileName}`, JSON.stringify(globalProducts));
     } catch (error) {
         console.error('Error persisting product', error);
     }
