@@ -12,7 +12,8 @@
 * JSON
 * Arrays
 * Exceptions and Try/Catch
-* 
+* Npm scripts
+* Nodemon (live reload)
 
 
 
@@ -20,11 +21,17 @@
 * Babel
 * Decorators
 * Strinct mode
-* 
 
 
 ## Install
-> 
+```console
+$ cd challenge-2
+$ npm install
+``` 
 
 ## Run
-> npm start
+By default, the project starts using nodemon (live reload).
+
+```console
+$ npm start
+```
